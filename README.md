@@ -16,4 +16,4 @@
 
 ### Sending CAN Packets
 * To send using CAN_SerialSender, set the Arbitration ID (ex. 0x0A8) and Message (ex. 0xDEADBEEF) like so: `./m2.py -i 0A8 -m DEADBEEF`
-** The CAN_SerialSender sketch can either be uploaded before or concurrently (``./m2.py -u Serial -i 0A8 -m DEADBEEF`)
+...* The CAN_SerialSender sketch can either be uploaded before or concurrently (``./m2.py -u Serial -i 0A8 -m DEADBEEF`)
