@@ -23,3 +23,5 @@ if not os.path.isdir("Arduino"):
 #Copy hardware files to Arduino folder:
 if not os.path.isdir("Arduino/build/linux/work/macchina")
     call(["cp -r macchina Arduino/build/linux/work/"], shell=True)
+
+call(["chmod +x m2.py"], shell=True)
