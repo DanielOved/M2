@@ -5,18 +5,15 @@ import serial
 import serial.tools.list_ports
 from subprocess import call
 
-
-CURRENT_DIR = "/home/daniel/Desktop/autopen2/CAN"
 ARDUINO_PATH = "./Arduino/build/linux/work/arduino"
-ARDUINO_LIBS = "~/Arduino"
-ARDUINO_HARDWARE_PATH = "macchina:sam:m2"
+M2_HARDWARE_PATH = "macchina:sam:m2"
 BAUDRATE = 115200
 
 #sketches = {sketchName:pathToFile}
-sketches = {'M2RET':'{}/M2RET/M2RET.ino'.format(ARDUINO_LIBS),
-            'Serial':'{}/CAN_SerialSender/CAN_SerialSender.ino'.format(ARDUINO_LIBS),
-            'DoS':'{}/CAN_DOS/CAN_DOS.ino'.format(ARDUINO_LIBS),
-            'Test':'{}/ledM2/ledM2.ino'.format(ARDUINO_LIBS)}
+sketches = {'M2RET':'sketches/M2RET/M2RET.ino',
+            'Serial':'sketches/CAN_SerialSender/CAN_SerialSender.ino',
+            'DoS':'sketches/CAN_DOS/CAN_DOS.ino',
+            'Test':'sketches/ledM2/ledM2.ino'}
 
 parser = argparse.ArgumentParser(description='Flash the M2 and/or send CAN packets.',
     epilog="To send CAN packets, first make sure to upload the ATT[]#] binary (m2.py -u ATT[#]), then send messages using -m [message]. To use the reverse engineering tool, simply upload M2RET (m2.py -u M2RET) and open up SavvyCAN. Uploading only needs to be done once for switching modes, not per usage.")
@@ -61,7 +58,7 @@ if args.msg is not None:
 
 #Uploading scripts
 if args.upload is not None:
-    caller = ARDUINO_PATH + " --board " + ARDUINO_HARDWARE_PATH + " --upload " + sketches.get(args.upload) +" --port " + args.port
+    caller = ARDUINO_PATH + " --board " + M2_HARDWARE_PATH + " --upload " + sketches.get(args.upload) +" --port " + args.port
     call(caller, shell=True)
 
 #Sending serial data
