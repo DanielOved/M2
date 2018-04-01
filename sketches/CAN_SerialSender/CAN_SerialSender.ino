@@ -1,5 +1,5 @@
 //Listens for serial ID and MSG and sends it over the CAN bus.
-//The message must be sent as one continuous string of hex numbers with ID in the first 3 places and MSG in the last 8.
+//The message must be sent as one continuous string of hex chars with ID in the first 3 places and MSG in the last 8.
 //Ex. To send as ID 0x123 the message 0xDEADBEEF, input "123DEADBEEF"
 
 #include "variant.h"
@@ -12,15 +12,15 @@ void setup()
 {
 
   Serial.begin(115200);
-  
+
   // Initialize CAN0 and CAN1, Set the proper baud rates here
   Can0.begin(CAN_BPS_500K);
   Can1.begin(CAN_BPS_500K);
   //Can0.beginAutoSpeed();
   //Can1.beginAutoSpeed();
 
-  
-  Can0.watchFor(); 
+
+  Can0.watchFor();
 
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(LED_BUILTIN, OUTPUT);
@@ -29,17 +29,11 @@ void setup()
 void sendData(int id, int msg)
 {
 	CAN_FRAME outgoing;
-	outgoing.id = 0x000;
+	outgoing.id = id;
 	outgoing.extended = false;
 	outgoing.priority = 0; //0-15 lower is higher priority
-	
-	//outgoing.data.s0 = 0xFEED;
-  //outgoing.data.byte[2] = 0x41;//DD
-	//outgoing.data.byte[3] = 0x41; //55
-	//outgoing.data.high = 0x0000410000000000;
+      outgoing.data.high = msg;
 
-  outgoing.data.high = 0x0620000001410000;
-  
 	Can0.sendFrame(outgoing);
 }
 
@@ -67,7 +61,7 @@ void loop(){
 
     int idNum = (int)strtol(id, NULL, 16);
     int msgNum = (int)strtol(msg, NULL, 16);
-    sendData(idNum, msgNum); 
+    sendData(idNum, msgNum);
 
     Serial.print("ID: ");
     Serial.println(idNum);
@@ -75,5 +69,3 @@ void loop(){
     Serial.println(msgNum);
   }
 }
-
-

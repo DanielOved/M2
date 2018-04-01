@@ -1,9 +1,9 @@
 # M2
 
-
 ## Installation for Ubuntu 16.04
 1. Clone the repository
 2. Run `python setupM2.py`
+	* This script will install the latest version of Arduino from github. This is necessary for using the Arduino command line interface, which isn't available from the Ubuntu package manager. If you already have a working Arduino program which can be run from the command line, create a sym-link to it in the M2 directory. You may need to modify m2.py to accomodate this. Further details to come.
 
 ## Usage
 ### Uploading Scripts

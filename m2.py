@@ -22,7 +22,6 @@ parser.add_argument('-u', '--upload', dest='upload', choices=[s for s in sketche
                     help='Choose which script to upload to the M2')
 
 parser.add_argument('-p', '--port', dest='port', choices=[p[0] for p in list(serial.tools.list_ports.comports())],
-                    default= list(serial.tools.list_ports.comports())[0][0],
                     help='Define the port to upload the script through')
 
 parser.add_argument('-i', '--id', dest='id',
@@ -35,7 +34,7 @@ parser.add_argument('-l','--listen', action='store_true', help='Listen to serial
 
 args = parser.parse_args()
 
-#Set up serial port
+#Set up serial port   #TODO: shit got weird when no ports are available, had to remove default line
 ser = serial.Serial(args.port,BAUDRATE)
 
 #Verify the ID and Message args
@@ -56,20 +55,45 @@ if args.msg is not None:
         if not int(args.msg,16) <= 0xFFFFFFFF:
             print("MSG must be between 0x00000000 and 0xFFFFFFFF, with no leading '0x'")
 
-#Uploading scripts
-if args.upload is not None:
-    caller = ARDUINO_PATH + " --board " + M2_HARDWARE_PATH + " --upload " + sketches.get(args.upload) +" --port " + args.port
-    call(caller, shell=True)
+def sendSerial(id,msg,port=0,time=5):
+    try:
+        ser = serial.Serial(port,BAUDRATE)
+    except serial.SerialException:
+        print("Couldn't connect to port: {}".format(port))
+    else:
+        #Sending serial data
+        ser.write(id+msg)
+        listenSerial(port,time)
+        #ser.close()?
 
-#Sending serial data
+def listenSerial(port,time=0):
+    #Listen to serial port
+    ser = serial.Serial(port,BAUDRATE)
+    if time == 0:
+        print("Listening to serial port indefinitely:\n")
+        while True:
+            print ser.readline()
+    else:
+        print("Listening for {} seconds".format(time))
+
+
+def uploadScript(script, port=0):
+    #Uploading scripts
+    caller = ARDUINO_PATH + " --board " + M2_HARDWARE_PATH + " --upload " + sketches.get(script)
+    if port != 0:
+        caller += " --port " + port
+    call(caller, shell=True)
+#Caller to Upload Script
+if args.upload is not None:
+    if args.port is not None:
+        uploadScript(args.upload, args.port)
+    else:
+        uploadScript(args.upload)
+
 if args.id is not None and args.msg is not None:
     if args.upload is not None:
         args.port = list(serial.tools.list_ports.comports())[0][0]
-        ser = serial.Serial(args.port,BAUDRATE)
-    ser.write(args.id+args.msg)
+    sendSerial(args.id,args.msg,args.port)
 
-#Listen to serial port
 if args.listen:
-    print("Listening to serial port indefinitely:\n")
-    while True:
-        print ser.readline()
+    listenSerial(args.port)
