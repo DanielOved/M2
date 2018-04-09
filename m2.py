@@ -41,8 +41,8 @@ ser = serial.Serial(args.port,BAUDRATE)
 if args.id is not None:
     if args.msg is None:
         print("Error: ID missing accompanying Message")
-    if not args.id in ["%03x" % i for i in range(0,257)] and not args.id in ["%03X" % i for i in range(0,257)]:
-        print("ID must be between 0x000 and 0x100, with no leading '0x'")
+    if not args.id in ["%03x" % i for i in range(0,4096)] and not args.id in ["%03X" % i for i in range(0,4096)]:
+        print("ID must be between 0x000 and 0xFFF, with no leading '0x'")
 
 if args.msg is not None:
     if args.id is None:
@@ -66,6 +66,46 @@ def sendSerial(id,msg,port=0,time=5):
         listenSerial(port,time)
         #ser.close()?
 
+def verifyId(inputId):
+    if not inputId in ["%03x" % i for i in range(0,4096)] and not args.id in ["%03X" % i for i in range(0,4096)]:
+        print("ID must be between 0x000 and 0xFFF, with no leading '0x'")
+        return False
+    return True
+
+def verifyMsg(inputMsg):
+    try:
+        int(inputMsg,16)
+    except ValueError:
+        print("Message must be a hexadecimal number")
+        return False
+    else:
+        if not int(inputMsg,16) <= 0xFFFFFFFFFFFFFFFF:
+            print("Message must be between 0x00000000 and 0xFFFFFFFFFFFFFFFF, with no leading '0x'")
+            return False
+    return True
+
+def sendSignalM2RET(id,msg,port=0,can=0,time=5):
+    if  not (verifyId(id) and verifyMsg(msg)):
+        print "Message not sent."
+        return
+
+    msgSplit = ",".join([msg[i:i+2] for i in range(0, len(msg),2)])
+    msgLen = len(msg)/2
+    formatted = "CAN{}SEND=0x{},{},{}".format(can,id,msgLen,msgSplit)  #"CAN0SEND=ID,LEN,<BYTES SEPARATED BY COMMAS> - Ex: CAN0SEND=0x200,4,1,2,3,4"
+    print "Sending: " + formatted
+    try:
+        ser = serial.Serial(port,BAUDRATE)
+    except serial.SerialException:
+        print("Couldn't connect to port: {}".format(port))
+        return
+    else:
+        #Sending serial data
+        ser.write(formatted)
+        listenSerial(port,time)
+        #ser.close()?
+
+
+
 def listenSerial(port,time=0):
     #Listen to serial port
     ser = serial.Serial(port,BAUDRATE)
@@ -75,7 +115,6 @@ def listenSerial(port,time=0):
             print ser.readline()
     else:
         print("Listening for {} seconds".format(time))
-
 
 def uploadScript(script, port=0):
     #Uploading scripts

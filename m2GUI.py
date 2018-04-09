@@ -1,12 +1,27 @@
 #! /usr/bin/python2.7
 
 from tkinter import *
+from tkinter import ttk
 import m2
 import serial
 
 def sendEntry():
-   print("ID: {}\nMessage: {}".format(e1.get(), e2.get()))
-   m2.sendSerial(e1.get(),e2.get(),portVar.get())
+   print("ID: {}\nMessage: {}".format(idEntry.get(), msgEntry.get()))
+   m2.sendSerial(idEntry.get(),msgEntry.get(),portVar.get())
+
+def sendEntryM2RET():
+    #add entries to dropdown
+    idvals = list(idEntry['values'])
+    if idEntry.get() not in idvals:
+        idvals.append(str(idEntry.get()))
+    idEntry['values'] = idvals
+
+    msgvals = list(msgEntry['values'])
+    if msgEntry.get() not in msgvals:
+        msgvals.append(str(msgEntry.get()))
+    msgEntry['values'] = msgvals
+
+    m2.sendSignalM2RET(idEntry.get(),msgEntry.get(),portVar.get())
 
 def reloadPorts():
     portChoices = [p[0] for p in list(serial.tools.list_ports.comports())] or {'No ports available'}
@@ -31,14 +46,15 @@ master = Tk()
 Label(master, text="ID").grid(row=2)
 Label(master, text="Message").grid(row=3)
 
-e1 = Entry(master)
-e2 = Entry(master)
+idEntry = ttk.Combobox(master)
+msgEntry = ttk.Combobox(master)
 
-e1.grid(row=2, column=1)
-e2.grid(row=3, column=1)
 
-e1.insert(10,"3 Hex Chars")
-e2.insert(10,"8 Hex Chars")
+idEntry.grid(row=2, column=1)
+msgEntry.grid(row=3, column=1)
+
+idEntry.insert(10,"3 Hex Chars")
+msgEntry.insert(10,"8 Hex Chars")
 
 #Script Setup ==============================
 scriptVar = StringVar(master)
@@ -68,6 +84,7 @@ popupMenu2.grid(row = 1, column =1)
 Button(master,text='Upload', command=uploadScript).grid(row=0,column=2)
 Button(master,text='Reload', command=reloadPorts).grid(row=1,column=2)
 Button(master, text='Quit', command=master.quit).grid(row=4, column=0, sticky=W, pady=4)
-Button(master, text='Send it!', command=sendEntry).grid(row=4, column=2, sticky=W, pady=4)
+Button(master, text='Send it! (M2RET)', command=sendEntryM2RET).grid(row=4, column=2, sticky=W, pady=4)
+#Button(master, text='Send it!', command=sendEntry).grid(row=4, column=2, sticky=W, pady=4)
 #============================================
 mainloop( )
